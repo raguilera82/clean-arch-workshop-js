@@ -1,19 +1,20 @@
 import axios from "axios";
+import { NotificationBloc } from "../blocs/notification.bloc.js";
 
 export class CharactersData {
   /**
    * @param {number} page
    */
   async fetchCharacters(page) {
-    const response = await axios.get(
-      `https://rickandmortyapi.com/api/character?page=${page}`
-    );
-    if (response.status === 200) {
+    try {
+      const response = await axios.get(
+        `https://rickandmortyapi.com/api/character?page=${page}`
+      );
       const /**@type {import("./types.js").CharactersDataDto} */ data =
           await response.data;
       return data;
-    } else {
-      throw new Error(response.statusText);
+    } catch (error) {
+      throw error;
     }
   }
 }

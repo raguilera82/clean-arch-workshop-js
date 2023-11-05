@@ -20,6 +20,10 @@ export class CharactersContainer extends LitElement {
     const handleState = (
       /** @type {import("../core/blocs/characters.bloc.js").CharactersState} */ state
     ) => {
+      console.log(
+        "TCL: CharactersContainer -> connectedCallback -> state",
+        state
+      );
       this.characters = state.characters;
       this.currentPage = state.currentPage;
     };
@@ -40,7 +44,8 @@ export class CharactersContainer extends LitElement {
   render() {
     return html`${this.showCurrentPage()}${this.showActions()}${this.characters
       ? this.characters.map((character) => {
-          return html`<div>${character.fullname}</div>`;
+          return html`<div>${character.fullname}</div>
+            <img src="${character.imageUrl}" />`;
         })
       : ``}`;
   }

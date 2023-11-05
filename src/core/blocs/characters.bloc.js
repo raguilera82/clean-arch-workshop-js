@@ -1,5 +1,6 @@
-import { CharactersService } from "../services/characters.service.js";
+import { GetCharactersUseCase } from "../usecases/characters.usecase.js";
 import { BaseBloc } from "./base.bloc.js";
+import { NotificationBloc } from "./notification.bloc.js";
 
 /**
  * @typedef {Object} CharactersState
@@ -19,7 +20,6 @@ export class CharactersBloc extends BaseBloc {
     if (CharactersBloc.instance) {
       return CharactersBloc.instance;
     }
-
     CharactersBloc.instance = this;
   }
 
@@ -28,23 +28,31 @@ export class CharactersBloc extends BaseBloc {
    */
   static getInstance() {
     if (!CharactersBloc.instance) {
-      CharactersBloc.instance = new CharactersBloc("characters_js_state");
+      CharactersBloc.instance = new CharactersBloc("characters_state");
     }
     return CharactersBloc.instance;
   }
 
   /**
-   * @returns {Promise<import("../services/characters.service.js").GetCharactersOutput>}
+   * @returns {Promise<void>}
    */
   async loadCharacters() {
-    const service = new CharactersService();
-    const /** @type {CharactersState} */ state = this.getState();
-    const charactersOutput = await service.getCharacters(state.currentPage);
-    this.setState({
-      characters: charactersOutput.characters,
-      lastPage: charactersOutput.lastPage,
-    });
-    return charactersOutput;
+    try {
+      const useCase = new GetCharactersUseCase();
+      const /** @type {CharactersState} */ state = this.getState();
+      const page = state?.currentPage || 1;
+      this.setState({ currentPage: page });
+      const charactersOutput = await useCase.execute({ page });
+      this.setState({
+        characters: charactersOutput.characters,
+        lastPage: charactersOutput.lastPage,
+      });
+    } catch (error) {
+      const /** @type {NotificationBloc} */ notificationBloc =
+          NotificationBloc.getInstance();
+      notificationBloc.setNotification("Error en los characters");
+      throw error;
+    }
   }
 
   /**
@@ -57,17 +65,17 @@ export class CharactersBloc extends BaseBloc {
 
   async nextPage() {
     const /** @type {CharactersState} */ state = this.getState();
-    const currentPage = state.currentPage + 1;
+    const currentPage = state.currentPage ? state.currentPage + 1 : 1;
     const lastPage = state.lastPage;
     if (currentPage <= lastPage) {
-      this.setState({ currentPage: state.currentPage + 1 });
+      this.setState({ currentPage });
       await this.loadCharacters();
     }
   }
 
   async previousPage() {
     const /** @type {CharactersState} */ state = this.getState();
-    const currentPage = state.currentPage - 1;
+    const currentPage = state.currentPage ? state.currentPage - 1 : 1;
     if (currentPage > 0) {
       this.setState({ currentPage });
       await this.loadCharacters();

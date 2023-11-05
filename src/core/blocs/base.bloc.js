@@ -1,59 +1,36 @@
 /**
- * Clase que define un Bloc base para el manejo de estado y suscripción a cambios.
  * @template T
  */
 export class BaseBloc {
   /**
-   * Lista de suscriptores que reaccionarán a cambios de estado.
-   */
-  #subscribers = [];
-
-  /**
-   * Estado actual del Bloc.
-   * @type {T}
-   */
-  #state;
-
-  /**
-   * Clave para persistir el estado en el almacenamiento local.
+   * @type {String}
    */
   #persistKey;
 
   /**
-   * Crea una instancia del Bloc.
-   * @param {string} persistKey - Clave para persistir el estado en el almacenamiento local.
+   * @type {Function[]}
+   */
+  #subscribers;
+
+  /** @type {T} */
+  #state;
+
+  /**
+   * @param {String} persistKey
    */
   constructor(persistKey) {
+    this.#subscribers = [];
     this.#persistKey = persistKey;
-    this.loadPersistedState();
+
+    this.#loadPersistedState();
 
     window.addEventListener("beforeunload", () => {
-      this.savePersistedState();
+      this.#savePersistedState();
     });
   }
 
   /**
-   * Carga el estado previamente persistido desde el almacenamiento local.
-   */
-  loadPersistedState() {
-    const persistedState = localStorage.getItem(this.#persistKey);
-    if (persistedState) {
-      this.#state = JSON.parse(persistedState);
-      localStorage.removeItem(this.#persistKey);
-    }
-  }
-
-  /**
-   * Guarda el estado actual en el almacenamiento local.
-   */
-  savePersistedState() {
-    localStorage.setItem(this.#persistKey, JSON.stringify(this.#state));
-  }
-
-  /**
-   * Establece un nuevo estado combinando el estado actual con el nuevo estado proporcionado.
-   * Luego notifica a los suscriptores sobre el cambio.
-   * @param {T} newState - Nuevo estado a aplicar.
+   * @param {T} newState
    */
   setState(newState) {
     this.#state = { ...this.#state, ...newState };
@@ -61,16 +38,14 @@ export class BaseBloc {
   }
 
   /**
-   * Obtiene el estado actual del Bloc.
-   * @returns {T} - Estado actual del Bloc.
+   * @returns {T}
    */
   getState() {
     return this.#state;
   }
 
   /**
-   * Suscribe una función para recibir notificaciones sobre cambios de estado.
-   * @param {Function} callback - Función a suscribir.
+   * @param {Function} callback
    */
   subscribe(callback) {
     this.#subscribers.push(callback);
@@ -78,8 +53,7 @@ export class BaseBloc {
   }
 
   /**
-   * Desuscribe una función para dejar de recibir notificaciones sobre cambios de estado.
-   * @param {Function} callback - Función a desuscribir.
+   * @param {Function} callback
    */
   unsubscribe(callback) {
     const index = this.#subscribers.indexOf(callback);
@@ -88,19 +62,28 @@ export class BaseBloc {
     }
   }
 
-  /**
-   * Notifica a todos los suscriptores sobre el cambio de estado.
-   */
+  #loadPersistedState() {
+    const persistedState = sessionStorage.getItem(this.#persistKey);
+    if (persistedState) {
+      this.#state = JSON.parse(persistedState);
+      sessionStorage.removeItem(this.#persistKey);
+    }
+  }
+
+  #savePersistedState() {
+    console.log(
+      "TCL: BaseBloc -> #savePersistedState -> his.#state",
+      this.#state
+    );
+    sessionStorage.setItem(this.#persistKey, JSON.stringify(this.#state));
+  }
+
   #notifySubscribers() {
     this.#subscribers.forEach((callback) => {
       this.#notifySubscriber(callback);
     });
   }
 
-  /**
-   * Notifica a un suscriptor específico sobre el cambio de estado.
-   * @param {Function} callback - Función del suscriptor a notificar.
-   */
   #notifySubscriber(callback) {
     callback(this.#state);
   }
