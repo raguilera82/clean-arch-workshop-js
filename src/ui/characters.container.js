@@ -1,11 +1,13 @@
 import { LitElement, html } from "lit";
-import { CharactersBloc } from "../core/blocs/characters.bloc.js";
+import charactersBlocInstance from "../core/blocs/characters.bloc.js";
+import notificationBlocInstance from "../core/blocs/notification.bloc.js";
 
 export class CharactersContainer extends LitElement {
   static get properties() {
     return {
       characters: { type: Array },
       currentPage: { type: Number },
+      notification: { type: String },
     };
   }
 
@@ -13,22 +15,30 @@ export class CharactersContainer extends LitElement {
     super.connectedCallback();
 
     this.currentPage = 1;
+    this.notification = "";
 
-    this.charactersBloc = CharactersBloc.getInstance();
-    await this.charactersBloc.loadCharacters();
+    await charactersBlocInstance.loadCharacters();
 
-    const handleState = (
+    const handleStateCharacters = (
       /** @type {import("../core/blocs/characters.bloc.js").CharactersState} */ state
     ) => {
-      console.log(
-        "TCL: CharactersContainer -> connectedCallback -> state",
-        state
-      );
       this.characters = state.characters;
       this.currentPage = state.currentPage;
     };
 
-    this.charactersBloc.subscribe(handleState);
+    charactersBlocInstance.subscribe(handleStateCharacters);
+
+    const handleStateNotification = (
+      /** @type {import("../core/blocs/notification.bloc.js").NotificationState} */ state
+    ) => {
+      this.notification = state.notification;
+    };
+
+    notificationBlocInstance.subscribe(handleStateNotification);
+  }
+
+  showNotification() {
+    return html`<div>${this.notification}</div>`;
   }
 
   showCurrentPage() {
@@ -36,13 +46,16 @@ export class CharactersContainer extends LitElement {
   }
 
   showActions() {
-    return html`<button @click="${() => this.charactersBloc.previousPage()}">
+    return html`<button @click="${() => charactersBlocInstance.previousPage()}">
         Previous</button
-      ><button @click="${() => this.charactersBloc.nextPage()}">Next</button>`;
+      ><button @click="${() => charactersBlocInstance.nextPage()}">
+        Next
+      </button>`;
   }
 
   render() {
-    return html`${this.showCurrentPage()}${this.showActions()}${this.characters
+    return html`${this.showNotification()}${this.showCurrentPage()}${this.showActions()}${this
+      .characters
       ? this.characters.map((character) => {
           return html`<div>${character.fullname}</div>
             <img src="${character.imageUrl}" />`;

@@ -1,5 +1,4 @@
 import axios from "axios";
-import { NotificationBloc } from "../blocs/notification.bloc.js";
 
 export class CharactersData {
   /**

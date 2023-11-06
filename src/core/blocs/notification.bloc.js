@@ -1,27 +1,17 @@
 import { BaseBloc } from "./base.bloc.js";
 
-export class NotificationBloc extends BaseBloc {
-  static instance = null;
-
+/**
+ * @typedef {Object} NotificationState
+ * @property {String} notification
+ */
+class NotificationBloc extends BaseBloc {
   /**
    *
    * @param {String} stateName
    */
   constructor(stateName) {
     super(stateName);
-
-    if (NotificationBloc.instance) {
-      return NotificationBloc.instance;
-    }
-
-    NotificationBloc.instance = this;
-  }
-
-  static getInstance() {
-    if (!NotificationBloc.instance) {
-      NotificationBloc.instance = new NotificationBloc("notification_state");
-    }
-    return NotificationBloc.instance;
+    this.setNotification("Works!");
   }
 
   /**
@@ -30,5 +20,11 @@ export class NotificationBloc extends BaseBloc {
    */
   setNotification(notification) {
     this.setState({ notification });
+    setTimeout(() => {
+      this.setState({ notification: "" });
+    }, 3000);
   }
 }
+
+const notificationBlocInstance = new NotificationBloc("notification_state");
+export default notificationBlocInstance;

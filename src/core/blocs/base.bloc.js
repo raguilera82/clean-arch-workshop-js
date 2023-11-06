@@ -71,10 +71,6 @@ export class BaseBloc {
   }
 
   #savePersistedState() {
-    console.log(
-      "TCL: BaseBloc -> #savePersistedState -> his.#state",
-      this.#state
-    );
     sessionStorage.setItem(this.#persistKey, JSON.stringify(this.#state));
   }
 

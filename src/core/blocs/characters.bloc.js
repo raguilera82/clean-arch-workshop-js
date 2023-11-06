@@ -1,6 +1,6 @@
 import { GetCharactersUseCase } from "../usecases/characters.usecase.js";
 import { BaseBloc } from "./base.bloc.js";
-import { NotificationBloc } from "./notification.bloc.js";
+import notificationBloc from "./notification.bloc.js";
 
 /**
  * @typedef {Object} CharactersState
@@ -8,29 +8,12 @@ import { NotificationBloc } from "./notification.bloc.js";
  * @property {number} currentPage
  * @property {number} lastPage
  */
-export class CharactersBloc extends BaseBloc {
-  static instance = null;
-
+class CharactersBloc extends BaseBloc {
   /**
    * @param {string} stateName
    */
   constructor(stateName) {
     super(stateName);
-
-    if (CharactersBloc.instance) {
-      return CharactersBloc.instance;
-    }
-    CharactersBloc.instance = this;
-  }
-
-  /**
-   * @returns {CharactersBloc}
-   */
-  static getInstance() {
-    if (!CharactersBloc.instance) {
-      CharactersBloc.instance = new CharactersBloc("characters_state");
-    }
-    return CharactersBloc.instance;
   }
 
   /**
@@ -48,8 +31,6 @@ export class CharactersBloc extends BaseBloc {
         lastPage: charactersOutput.lastPage,
       });
     } catch (error) {
-      const /** @type {NotificationBloc} */ notificationBloc =
-          NotificationBloc.getInstance();
       notificationBloc.setNotification("Error en los characters");
       throw error;
     }
@@ -82,3 +63,6 @@ export class CharactersBloc extends BaseBloc {
     }
   }
 }
+
+const charactersBlocInstance = new CharactersBloc("characters_state");
+export default charactersBlocInstance;
